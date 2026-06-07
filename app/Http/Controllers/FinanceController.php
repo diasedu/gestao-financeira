@@ -9,11 +9,18 @@ use Illuminate\Http\Request;
 
 class FinanceController extends Controller
 {
+    protected Finance $financeModel;
+    
+    public function __construct()
+    {
+        $this->financeModel = new Finance();
+    }
+
     private const VALIDATION_RULES = [
         'descricao' => ['required', 'max:255'],
         'valor'     => ['required', 'decimal:2']
     ];
-
+        
     public function save(Request $request): JsonResponse
     {
         try {
@@ -27,14 +34,16 @@ class FinanceController extends Controller
                 ], 422);
             }
 
-            $finance = new Finance();
-            $finance->desc  = $data['descricao'];
-            $finance->value = $data['valor'];
-            $finance->save();
+            $this->financeModel->desc  = $data['descricao'];
+            $this->financeModel->value = $data['valor'];
+            $this->financeModel->save();
+
+            $id = $this->financeModel->id;
 
             return response()->json([
                 'status'  => 'success',
-                'message' => 'Recurso criado com sucesso!'
+                'message' => 'Recurso criado com sucesso!',
+                'data'    => ['id' => $id]
             ], 201);
         } catch (Exception $e) {
             return response()->json([
@@ -54,7 +63,7 @@ class FinanceController extends Controller
                 ], 422);
             }
 
-            $finance = Finance::find($id);
+            $finance = $this->financeModel::find($id);
             
             if (!$finance) {
                 return response()->json([
@@ -78,7 +87,7 @@ class FinanceController extends Controller
     public function list(): JsonResponse
     {
         try {
-            $finances = Finance::all();
+            $finances = $this->financeModel::all();
 
             return response()->json([
                 'status' => 'success',
@@ -102,7 +111,7 @@ class FinanceController extends Controller
                 ], 422);
             }
 
-            $finance = Finance::find($id);
+            $finance = $this->financeModel::find($id);
             
             if (!$finance) {
                 return response()->json([

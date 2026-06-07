@@ -15,8 +15,11 @@ class VerifyTokenIsValid
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->header('x-api-key') !== env('API_KEY')) {
-            return response(['message' => 'Não autorizado!'], 401);
+        $authHeader = $request->header('x-api-key');
+        $apiKey     = env('API_KEY');
+
+        if ( (empty($authHeader)) || ($authHeader <> $apiKey) ) {
+            return response(['message' => 'Chave de API inválida ou não informada']);
         }
 
         return $next($request);
